@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="Y6W-OH-hqX">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Pokemon Detail StatsVC-->
+        <scene sceneID="s0d-6b-0kx">
+            <objects>
+                <viewController id="Y6W-OH-hqX" customClass="PokemonDetailStatsVC" customModule="PokeApp" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="5EZ-qb-Rvc">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="4kH-Qv-LkW">
+                                <rect key="frame" x="0.0" y="0.0" width="414" height="862"/>
+                                <subviews>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="P6l-10-V9V">
+                                        <rect key="frame" x="0.0" y="0.0" width="414" height="818"/>
+                                        <subviews>
+                                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="mBG-gF-em5">
+                                                <rect key="frame" x="16" y="16" width="382" height="786"/>
+                                            </stackView>
+                                        </subviews>
+                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                        <constraints>
+                                            <constraint firstAttribute="bottom" secondItem="mBG-gF-em5" secondAttribute="bottom" constant="16" id="GWe-zF-BzC"/>
+                                            <constraint firstAttribute="trailing" secondItem="mBG-gF-em5" secondAttribute="trailing" constant="16" id="MkC-K1-48d"/>
+                                            <constraint firstItem="mBG-gF-em5" firstAttribute="top" secondItem="P6l-10-V9V" secondAttribute="top" constant="16" id="c7c-db-68Q"/>
+                                            <constraint firstItem="mBG-gF-em5" firstAttribute="leading" secondItem="P6l-10-V9V" secondAttribute="leading" constant="16" id="iED-0f-F5U"/>
+                                        </constraints>
+                                    </view>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstItem="P6l-10-V9V" firstAttribute="top" secondItem="4kH-Qv-LkW" secondAttribute="top" id="4OW-2q-At4"/>
+                                    <constraint firstAttribute="bottom" secondItem="P6l-10-V9V" secondAttribute="bottom" id="WDS-YX-193"/>
+                                    <constraint firstItem="P6l-10-V9V" firstAttribute="leading" secondItem="4kH-Qv-LkW" secondAttribute="leading" id="or0-05-bbg"/>
+                                    <constraint firstAttribute="trailing" secondItem="P6l-10-V9V" secondAttribute="trailing" id="wVq-er-8zj"/>
+                                </constraints>
+                            </scrollView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="vDu-zF-Fre"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="4kH-Qv-LkW" firstAttribute="width" secondItem="vDu-zF-Fre" secondAttribute="width" priority="250" id="5rP-cL-gPO"/>
+                            <constraint firstItem="P6l-10-V9V" firstAttribute="height" secondItem="vDu-zF-Fre" secondAttribute="height" priority="250" id="7qf-YJ-6dd"/>
+                            <constraint firstItem="4kH-Qv-LkW" firstAttribute="top" secondItem="5EZ-qb-Rvc" secondAttribute="top" id="9Ev-tu-Sdf"/>
+                            <constraint firstItem="4kH-Qv-LkW" firstAttribute="leading" secondItem="5EZ-qb-Rvc" secondAttribute="leading" id="Krb-Zu-h1A"/>
+                            <constraint firstItem="4kH-Qv-LkW" firstAttribute="height" relation="greaterThanOrEqual" secondItem="vDu-zF-Fre" secondAttribute="height" priority="250" id="Qhp-ad-CqE"/>
+                            <constraint firstItem="4kH-Qv-LkW" firstAttribute="bottom" secondItem="vDu-zF-Fre" secondAttribute="bottom" id="VeV-47-iwN"/>
+                            <constraint firstItem="P6l-10-V9V" firstAttribute="width" secondItem="vDu-zF-Fre" secondAttribute="width" id="ih2-qf-0av"/>
+                            <constraint firstItem="4kH-Qv-LkW" firstAttribute="trailing" secondItem="vDu-zF-Fre" secondAttribute="trailing" id="lqg-YK-SPW"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="parentStackView" destination="mBG-gF-em5" id="j1C-QW-zYo"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Ief-a0-LHa" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="79.710144927536234" y="70.982142857142847"/>
+        </scene>
+    </scenes>
+    <resources>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>
