@@ -37,35 +37,16 @@ class PokemonCell: UITableViewCell {
     self.selectedBackgroundView?.layer.insertSublayer(gradient, at: 0)
   }
   
-  func setupView(tableView: UITableView, data: DAOPokemonListResults?) {
-    // api list: https://pokeapi.co/api/v2/pokemon/
-    // image = response.results.url.sprites.front_default // sementara
-    // name = response.results.name
-//    self.pokemonNameLabel.text = data?.name ?? ""
+  func setupView(data: DAOPokemonListResults?) {
+    self.pokemonNameLabel.text = data?.name ?? ""
+    self.pokemonImageView?.sd_setImage(with: URL(string: data?.pokemonDetail?.sprites?.frontDefault ?? "")) { (img, err, cache, url) in
+      if err == nil {
+        self.pokemonImageView.image = img
+      } else {
+        self.pokemonImageView?.image = nil
+        self.pokemonImageView?.backgroundColor = UIColor.white
+      }
+    }
   }
   
-//  func setGradientColor() -> UIView {
-//    let backgroundView = UIView()
-//    let colors = Colors.init()
-//    backgroundView.backgroundColor = UIColor.clear
-//    let backgroundLayer = colors.gl
-//    backgroundLayer.frame = backgroundView.frame
-//    backgroundView.layer.insertSublayer(backgroundLayer, at: 0)
-//
-//    return backgroundView
-//  }
-  
 }
-
-//class Colors {
-//  var gl:CAGradientLayer = CAGradientLayer()
-//
-//  init() {
-//    let colorTop = UIColor(red: 192.0 / 255.0, green: 38.0 / 255.0, blue: 42.0 / 255.0, alpha: 1.0).cgColor
-//    let colorBottom = UIColor(red: 35.0 / 255.0, green: 2.0 / 255.0, blue: 2.0 / 255.0, alpha: 1.0).cgColor
-//
-//    self.gl = CAGradientLayer()
-//    self.gl.colors = [colorTop, colorBottom]
-//    self.gl.locations = [0.0, 1.0]
-//  }
-//}

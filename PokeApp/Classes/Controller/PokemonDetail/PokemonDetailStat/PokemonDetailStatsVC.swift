@@ -11,6 +11,10 @@ class PokemonDetailStatsVC: UIViewController {
   
   @IBOutlet weak var parentStackView: UIStackView!
   
+  var pokemonData: DAOPokemonListResults?
+  
+  var statsList: [DAOPokemonDetailStats] = []
+  
   let abilitiesList: [AbilitiesModel] = [AbilitiesModel(title: "Torrent", desc: "Power up Water-type moves when the Pokemon is in trouble."), AbilitiesModel(title: "Rain Dish", desc: "The Pokemon gradually regains HP in rain.")]
   
   let breedingList: [BreedingModel] = [BreedingModel(eggGroup: "Monster", hatchTime: "5101 Steps", gender: "12.5%"), BreedingModel(eggGroup: "Water I", hatchTime: "20 Cycles", gender: "87.5%")]
@@ -21,12 +25,16 @@ class PokemonDetailStatsVC: UIViewController {
   
   override func viewDidLoad() {
     super.viewDidLoad()
-    self.parentStackView.addArrangedSubview(self.createStats(total: 5))
-    self.parentStackView.addArrangedSubview(self.createWeaknesses(totalItem: 20, totalItemInRow: 3))
-    self.parentStackView.addArrangedSubview(self.createAbilities(abilitiesList: self.abilitiesList))
-    self.parentStackView.addArrangedSubview(self.createBreeding(breedingList: self.breedingList))
-    self.parentStackView.addArrangedSubview(self.createCapture(captureList: self.captureList))
-    self.parentStackView.addArrangedSubview(self.createSprites(spritesList: self.spritesList))
+    
+    if let data = self.pokemonData {
+      self.parentStackView.addArrangedSubview(self.createStats(stats: data.pokemonDetail?.stats ?? []))
+      self.parentStackView.addArrangedSubview(self.createWeaknesses(totalItem: 20, totalItemInRow: 3))
+      self.parentStackView.addArrangedSubview(self.createAbilities(abilitiesList: self.pokemonData?.pokemonDetail?.abilities ?? []))
+      self.parentStackView.addArrangedSubview(self.createBreeding(breedingList: self.breedingList))
+      self.parentStackView.addArrangedSubview(self.createCapture(captureList: self.captureList))
+      self.parentStackView.addArrangedSubview(self.createSprites(spritesList: self.spritesList))
+    }
+    
   }
   
   func createHeaderView(withTitle title: String) -> UILabel {
@@ -43,21 +51,21 @@ class PokemonDetailStatsVC: UIViewController {
 // MARK: - STATS
 extension PokemonDetailStatsVC {
   
-  func createStats(total: Int) -> UIStackView {
+  func createStats(stats: [DAOPokemonDetailStats]) -> UIStackView {
     let horizontalStack = UIStackView()
     horizontalStack.axis = .vertical
     horizontalStack.alignment = .fill
     horizontalStack.distribution = .fill
     horizontalStack.spacing = 10
     
-    for _ in 0 ... total - 1 {
-      horizontalStack.addArrangedSubview(self.createStatsView())
+    for (_, obj) in stats.enumerated() {
+      horizontalStack.addArrangedSubview(self.createStatsView(stats: obj))
     }
     
     return horizontalStack
   }
   
-  func createStatsView() -> UIStackView {
+  func createStatsView(stats: DAOPokemonDetailStats) -> UIStackView {
     let verticalStack = UIStackView()
     verticalStack.axis = .horizontal
     verticalStack.alignment = .fill
@@ -65,7 +73,7 @@ extension PokemonDetailStatsVC {
     verticalStack.spacing = 10
     
     let statLabel = UILabel()
-    statLabel.text = "HP"
+    statLabel.text = (stats.stat?.name ?? "-").uppercased()
     statLabel.translatesAutoresizingMaskIntoConstraints = false
     
     let statNumberLabel = UILabel()
@@ -73,10 +81,13 @@ extension PokemonDetailStatsVC {
     statNumberLabel.translatesAutoresizingMaskIntoConstraints = false
     
     let progressView = UIProgressView()
-    progressView.progressTintColor = .blue
-    progressView.setProgress(0.3, animated: true)
-    progressView.trackTintColor = .lightGray
+    progressView.progressTintColor = .systemTeal
+    progressView.setProgress(Float((stats.effort ?? 0) / (stats.baseStat ?? 0)), animated: true)
+    progressView.trackTintColor = .systemGray6
     progressView.translatesAutoresizingMaskIntoConstraints = false
+    progressView.heightAnchor.constraint(equalToConstant: 20).isActive = true
+    progressView.layer.cornerRadius = 10
+    progressView.layer.masksToBounds = true
     
     verticalStack.addArrangedSubview(statLabel)
     verticalStack.addArrangedSubview(statNumberLabel)
@@ -139,11 +150,10 @@ extension PokemonDetailStatsVC {
     verticalStack.spacing = 5
     
     let iconImageView = UIImageView()
-    iconImageView.backgroundColor = .blue
+    iconImageView.backgroundColor = .systemTeal
+    iconImageView.heightAnchor.constraint(equalToConstant: 20).isActive = true
+    iconImageView.widthAnchor.constraint(equalToConstant: 20).isActive = true
     iconImageView.translatesAutoresizingMaskIntoConstraints = false
-    
-    iconImageView.addConstraint(NSLayoutConstraint(item: iconImageView, attribute: .width, relatedBy: .equal, toItem: iconImageView, attribute: .width, multiplier: 1, constant: 10))
-    iconImageView.addConstraint(NSLayoutConstraint(item: iconImageView, attribute: .height, relatedBy: .equal, toItem: iconImageView, attribute: .height, multiplier: 1, constant: 10))
     
     let titleLabel = UILabel()
     titleLabel.text = "2x"
@@ -160,7 +170,7 @@ extension PokemonDetailStatsVC {
 // MARK: - ABILITIES
 extension PokemonDetailStatsVC {
   
-  func createAbilities(abilitiesList: [AbilitiesModel]) -> UIStackView {
+  func createAbilities(abilitiesList: [DAOPokemonDetailAbilities]) -> UIStackView {
     let horizontalStack = UIStackView()
     horizontalStack.axis = .vertical
     horizontalStack.alignment = .fill
@@ -176,7 +186,7 @@ extension PokemonDetailStatsVC {
     return horizontalStack
   }
   
-  func createAbilitiesView(abilities: AbilitiesModel) -> UIStackView {
+  func createAbilitiesView(abilities: DAOPokemonDetailAbilities) -> UIStackView {
     let verticalStack = UIStackView()
     verticalStack.axis = .vertical
     verticalStack.alignment = .fill
@@ -184,12 +194,12 @@ extension PokemonDetailStatsVC {
     verticalStack.spacing = 10
     
     let abilitiesNameLabel = UILabel()
-    abilitiesNameLabel.text = abilities.abilitiesTitle
+    abilitiesNameLabel.text = (abilities.ability?.name ?? "").capitalized
     abilitiesNameLabel.numberOfLines = 0
     abilitiesNameLabel.translatesAutoresizingMaskIntoConstraints = false
     
     let abilitiesDescLabel = UILabel()
-    abilitiesDescLabel.text = abilities.abilitiesDesc
+    abilitiesDescLabel.text = (abilities.ability?.url ?? "").capitalized
     abilitiesDescLabel.numberOfLines = 0
     abilitiesDescLabel.translatesAutoresizingMaskIntoConstraints = false
     

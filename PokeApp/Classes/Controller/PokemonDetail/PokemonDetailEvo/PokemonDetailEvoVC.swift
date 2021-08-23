@@ -11,6 +11,8 @@ class PokemonDetailEvoVC: UIViewController {
   
   @IBOutlet weak var tableView: UITableView!
   
+  var pokemonData: DAOPokemonListResults?
+  
   override func viewDidLoad() {
     super.viewDidLoad()
     self.setupTableView()
@@ -33,7 +35,6 @@ extension PokemonDetailEvoVC {
 extension PokemonDetailEvoVC: UITableViewDelegate, UITableViewDataSource {
   
   func numberOfSections(in tableView: UITableView) -> Int {
-//    return self.pokemonList.count
     return 1
   }
   

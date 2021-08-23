@@ -56,7 +56,7 @@ struct DAOPokemonDetailBaseClass: Codable {
     species = try container.decodeIfPresent(DAOPokemonDetailSpecies.self, forKey: .species)
     sprites = try container.decodeIfPresent(DAOPokemonDetailSprites.self, forKey: .sprites)
     order = try container.decodeIfPresent(Int.self, forKey: .order)
-    pastTypes = try container.decodeIfPresent([String].self, forKey: .pastTypes) // temporary
+//    pastTypes = try container.decodeIfPresent([String].self, forKey: .pastTypes) // temporary
     abilities = try container.decodeIfPresent([DAOPokemonDetailAbilities].self, forKey: .abilities)
     weight = try container.decodeIfPresent(Int.self, forKey: .weight)
     gameIndices = try container.decodeIfPresent([DAOPokemonDetailGameIndices].self, forKey: .gameIndices)
@@ -64,7 +64,7 @@ struct DAOPokemonDetailBaseClass: Codable {
     name = try container.decodeIfPresent(String.self, forKey: .name)
     moves = try container.decodeIfPresent([DAOPokemonDetailMoves].self, forKey: .moves)
     locationAreaEncounters = try container.decodeIfPresent(String.self, forKey: .locationAreaEncounters)
-    heldItems = try container.decodeIfPresent([String].self, forKey: .heldItems) // temporary
+//    heldItems = try container.decodeIfPresent([String].self, forKey: .heldItems) // temporary
     types = try container.decodeIfPresent([DAOPokemonDetailTypes].self, forKey: .types)
     forms = try container.decodeIfPresent([DAOPokemonDetailForms].self, forKey: .forms)
     id = try container.decodeIfPresent(Int.self, forKey: .id)

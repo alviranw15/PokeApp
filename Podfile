@@ -10,4 +10,5 @@ target 'PokeApp' do
   pod 'SwiftyJSON', '~> 4.0'
   pod 'SDWebImage'
   pod 'MXSegmentedPager'
+  pod 'PromiseKit'
 end

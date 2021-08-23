@@ -7,6 +7,7 @@
 
 import UIKit
 import SDWebImage
+import PromiseKit
 
 class MainMenuVC: UIViewController {
   
@@ -17,23 +18,40 @@ class MainMenuVC: UIViewController {
   
   var successCount = 0
   var apiFailed: [DAOPokemonListResults] = []
+  var isNeedToReloadTable: Bool = true
   
   override func viewDidLoad() {
     super.viewDidLoad()
-    self.navigationItem.title = "Pokemon"
+//    self.setupNavigationBar()
     self.setupTableView()
     if let pokeListCache = self.getPokeListCache(), !pokeListCache.isEmpty {
       self.pokemonList = pokeListCache
       self.tableView.reloadData()
     } else {
-      self.callAPI(url: "https://pokeapi.co/api/v2/pokemon/")
+      self.getPokemonData(url: "https://pokeapi.co/api/v2/pokemon/")
     }
-    
   }
   
 }
 
 extension MainMenuVC {
+  
+  func setupNavigationBar() {
+    // Find size for blur effect.
+    let statusBarHeight = UIApplication.shared.statusBarFrame.size.height
+    let bounds = self.navigationController?.navigationBar.bounds.insetBy(dx: 0, dy: -(statusBarHeight)).offsetBy(dx: 0, dy: -(statusBarHeight))
+    // Create blur effect.
+    let visualEffectView = UIVisualEffectView(effect: UIBlurEffect(style: .light))
+    visualEffectView.frame = bounds!
+    // Set navigation bar up.
+    self.navigationController?.navigationBar.isTranslucent = true
+    self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
+    self.navigationController?.navigationBar.addSubview(visualEffectView)
+    self.navigationController?.navigationBar.sendSubviewToBack(visualEffectView)
+    
+    self.navigationController?.navigationBar.shadowImage = UIImage()
+    self.navigationItem.title = "Pokemon"
+  }
   
   func setupTableView() {
     self.tableView.delegate = self
@@ -52,84 +70,72 @@ extension MainMenuVC {
   
 }
 
+// MARK: - GET API
 extension MainMenuVC {
   
-  func callAPI(url: String) {
-    WorkerPokemon.doGetPokemonList(url: url) { dataRequest in
-      
-    } onSuccess: { result in
-      self.pokemonTemporary = result
-      self.process()
-    } onFailed: { message, code in
-      if code == -1009 {
-        self.showAlert(message: message)
-      } else {
+  func getPokemonData(url: String) {
+    WorkerPokemon.getPokemonAPI(url: url)
+      .then { pokemonData -> Promise<DAOPokemonListBaseClass> in
+        var pokemonDataTmp = pokemonData
+        var resultList: [DAOPokemonListResults] = []
+        guard let results = pokemonData.results, !results.isEmpty else { return WorkerPokemon.brokenPromise() }
+        
+        Promise.value(results)
+          .thenMap { result -> Promise<DAOPokemonListResults> in
+            var resultTmp = result
+            WorkerPokemon.getPokemonDetailAPIs(url: result.url ?? "")
+              .done { detail in
+                resultTmp.pokemonDetail = detail
+                resultList.append(resultTmp)
+              }
+              .catch { error in
+                
+              }
+              .finally {
+                
+                if pokemonDataTmp.results?.count == resultList.count && self.isNeedToReloadTable {
+                  pokemonDataTmp.results = resultList
+                  self.pokemonList.append(pokemonDataTmp)
+                  self.savePokeListCache()
+                  self.tableView.reloadData()
+                  self.isNeedToReloadTable = false
+                } else {
+                  
+                }
+              }
+            return Promise.value(resultTmp)
+          }
+          .done { result in
+            
+          }
+          .catch { error in
+            
+          }
+          .finally {
+            
+          }
+        
+        return Promise.value(pokemonDataTmp)
+      }
+      .done { pokemonData in
         
       }
-    }
-  }
-  
-  func process() {
-    if let pokeList = self.pokemonTemporary?.results, !pokeList.isEmpty {
-      let queue = OperationQueue()
-      queue.maxConcurrentOperationCount = 2
-      self.apiFailed.removeAll() // reset
-      self.processPokemonList(list: pokeList, queue: queue)
-    } else {
-      // ?
-    }
-  }
-  
-  func processPokemonList(list: [DAOPokemonListResults], queue: OperationQueue) {
-    for (index, obj) in list.enumerated() {
-      if obj.pokemonDetail == nil {
-        self.getPokemonDetailAPI(row: index, url: obj.url ?? "", queue: queue) { dataRequest in
-          
-        } onSuccess: { row, result in
-          self.pokemonTemporary?.results![row].pokemonDetail = result
-          self.successCount += 1
-          self.check(queue: queue)
-        } onFailed: { message, code in
-          self.apiFailed.append(list[code ?? 0])
-          self.check(queue: queue)
-        }
+      .catch { error in
+        
       }
-    }
+      .finally {
+        
+      }
+      
   }
   
-  func check(queue: OperationQueue) {
-    if (self.successCount + self.apiFailed.count) == self.pokemonTemporary?.results?.count {
-      //      if self.apiFailed.isEmpty {
-      self.pokemonList.append(self.pokemonTemporary!)
-      self.pokemonTemporary = nil
-      self.apiFailed.removeAll()
-      self.successCount = 0
-      self.tableView.reloadData()
-      SessionManager.instance.setPokemonList(pokemonList: self.pokemonList)
-      //      queue.cancelAllOperations()
-      //      } else {
-      //        self.process()
-      // problem: id 12 15 19 20 always failed
-      //      }
-    } else {
-      // do nothing
-    }
-  }
+}
+
+// MARK: - CACHE
+extension MainMenuVC {
   
-  func getPokemonDetailAPI(row: Int, url: String, queue: OperationQueue, onRequest: @escaping onRequest, onSuccess: @escaping (_ row: Int ,_ result: DAOPokemonDetailBaseClass) -> Void, onFailed: @escaping onError) {
-    let operation = NetworkOperation(urlString: url) { urlString, responseObject, error in
-      guard let responseObject = responseObject else {
-        print("failed: \(error?.localizedDescription ?? "Unknown error")")
-        return
-      }
-      let jsonData = (responseObject.rawString() ?? "").data(using: .utf8)
-      if let jsonData = jsonData, let obj = try? JSONDecoder().decode(DAOPokemonDetailBaseClass.self, from: jsonData) {
-        onSuccess(row, obj)
-      } else {
-        onFailed(urlString, row)
-      }
-    }
-    queue.addOperation(operation)
+  func savePokeListCache() {
+    SessionManager.instance.setPokemonList(pokemonList: self.pokemonList)
   }
   
   func getPokeListCache() -> [DAOPokemonListBaseClass]? {
@@ -138,6 +144,7 @@ extension MainMenuVC {
   
 }
 
+// MARK: - TABLE VIEW
 extension MainMenuVC: UITableViewDelegate, UITableViewDataSource {
   
   func numberOfSections(in tableView: UITableView) -> Int {
@@ -150,18 +157,7 @@ extension MainMenuVC: UITableViewDelegate, UITableViewDataSource {
   
   func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     let cell = tableView.dequeueReusableCell(withIdentifier: "PokemonCell", for: indexPath) as? PokemonCell ?? PokemonCell()
-    let data = self.pokemonList[indexPath.section].results?[indexPath.row]
-    cell.pokemonNameLabel.text = data?.name ?? ""
-    cell.pokemonImageView?.sd_setImage(with: URL(string: data?.pokemonDetail?.sprites?.frontDefault ?? "")) { (img, err, cache, url) in
-      if err == nil {
-        //            self.setupImageRatio(image: img ?? UIImage())
-        cell.pokemonImageView.image = img
-      } else {
-        cell.pokemonImageView?.image = nil
-        cell.pokemonImageView?.backgroundColor = UIColor.white
-      }
-    }
-    
+    cell.setupView(data: self.pokemonList[indexPath.section].results?[indexPath.row])
     return cell
   }
   
@@ -178,12 +174,14 @@ extension MainMenuVC: UITableViewDelegate, UITableViewDataSource {
       self.tableView.tableFooterView?.isHidden = false
       let lastSection = self.pokemonList.count - 1
       let lastRow = (self.pokemonList[lastSection].results?.count ?? 1) - 1
-      //        if indexPath == IndexPath(row: lastRow, section: lastSection) {
+              if indexPath == IndexPath(row: lastRow, section: lastSection) {
       
-      self.callAPI(url: self.pokemonList[lastSection].next ?? "")
-      //        } else {
+//      self.callAPI(url: self.pokemonList[lastSection].next ?? "")
+      self.isNeedToReloadTable = true
+      self.getPokemonData(url: self.pokemonList[lastSection].next ?? "")
+              } else {
       
-      //        }
+              }
     }
   }
   
@@ -197,7 +195,8 @@ extension MainMenuVC: UITableViewDelegate, UITableViewDataSource {
   }
   
   func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-    Wireframe.performToPokemonDetail(caller: self)
+    Wireframe.performToPokemonDetail(caller: self, pokemonData: self.pokemonList[indexPath.section].results?[indexPath.row])
+    tableView.deselectRow(at: indexPath, animated: true)
   }
   
 }

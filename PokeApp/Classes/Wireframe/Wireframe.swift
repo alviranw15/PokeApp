@@ -24,26 +24,30 @@ struct Wireframe {
     }
   }
   
-  static func performToPokemonDetail(caller: UIViewController) {
+  static func performToPokemonDetail(caller: UIViewController, pokemonData: DAOPokemonListResults?) {
     let storyboard = UIStoryboard(name: "PokemonDetail", bundle: mainBundle)
     let nav = storyboard.instantiateInitialViewController() as? UINavigationController ?? UINavigationController()
     let vc = nav.topViewController as? PokemonDetailVC ?? PokemonDetailVC()
+//    let vc = storyboard.instantiateInitialViewController() as? PokemonDetailVC ?? PokemonDetailVC()
+    vc.pokemonData = pokemonData
     if caller.navigationController == nil {
       caller.addChild(nav)
       caller.view.addSubview(nav.view)
       nav.didMove(toParent: caller)
     } else {
       caller.navigationController?.pushViewController(vc, animated: true)
+//      caller.present(vc, animated: true, completion: nil)
     }
   }
   
-  static func initDetailStats() -> UIViewController {
+  static func initDetailStats(pokemonData: DAOPokemonListResults?) -> UIViewController {
     let storyboard = UIStoryboard(name: "PokemonDetailStats", bundle: mainBundle)
     let vc = storyboard.instantiateInitialViewController() as? PokemonDetailStatsVC ?? PokemonDetailStatsVC()
+    vc.pokemonData = pokemonData
     return vc
   }
   
-  static func initDetailEvo() -> UIViewController {
+  static func initDetailEvo(pokemonData: DAOPokemonListResults?) -> UIViewController {
     let storyboard = UIStoryboard(name: "PokemonDetailEvo", bundle: mainBundle)
     let vc = storyboard.instantiateInitialViewController() as? PokemonDetailEvoVC ?? PokemonDetailEvoVC()
     return vc
